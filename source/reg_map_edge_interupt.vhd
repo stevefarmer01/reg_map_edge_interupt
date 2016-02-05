@@ -32,12 +32,48 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity reg_map_edge_interupt is
-    Port ( clk : in STD_LOGIC);
+    generic (
+             reg_width : positive := 16
+             );
+    Port ( 
+          clk : in std_logic;
+          status_reg : in std_logic_vector(reg_width-1 downto 0) := (others => '0');
+          edge_detect_reg : out std_logic_vector(reg_width-1 downto 0) := (others => '0');
+          edge_detect_toggle_reg : in std_logic_vector(reg_width-1 downto 0) := (others => '0');
+          interupt_mask_reg : in std_logic_vector(reg_width-1 downto 0) := (others => '0');
+          interupt_flag : out std_logic := '0'
+          );
 end reg_map_edge_interupt;
 
 architecture Behavioral of reg_map_edge_interupt is
 
 begin
 
+edge_detect_proc : process
+    variable edge_detect_toggle_en_v : std_logic := '0';
+    variable status_reg_v, edge_detect_toggle_reg_v : std_logic_vector(status_reg'RANGE) := (others => '0');
+begin
+    wait until rising_edge(clk);
+    for i in status_reg'RANGE loop
+        if edge_detect_toggle_reg(i) and (edge_detect_toggle_en_v = '0' and edge_detect_toggle_en = '1') then -- If revelant toggle bit has just been set then..
+            edge_detect_reg(i) <= not edge_detect_reg(i);                                                     -- ..toggle detect bit
+        elsif status_reg_v(i) = '0' and status_reg(i) = '1' then                                              -- If +ve edge detected on status bit then..
+            edge_detect_reg(i) <= '1';                                                                        -- .. set edge detect bit
+        end if;
+    end loop;
+    edge_detect_toggle_en_v := edge_detect_toggle_en;
+    status_reg_v := status_reg;
+end process;
+
+interupt_proc : process
+begin
+    wait until rising_edge(clk);
+    for i in status_reg'RANGE loop
+        interupt_flag <= '0';                                           -- Default interupt to not active
+        if interupt_mask_reg(i) = '1' and edge_detect_reg(i) = '1' then -- Any unmasked edge detect that is high will activate/keep active interupt (all must be masked or cleared to deactivate interupt)
+            interupt_flag <= '1';
+        end if;
+    end loop;
+end process;
 
 end Behavioral;
