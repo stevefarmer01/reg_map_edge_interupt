@@ -1,14 +1,14 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
+-- Company: FFEI
+-- Engineer: Steve Farmer
 -- 
 -- Create Date: 04.02.2016 23:33:56
--- Design Name: 
+-- Design Name: common_ip
 -- Module Name: reg_map_edge_interupt - Behavioral
--- Project Name: 
+-- Project Name: Griffin
 -- Target Devices: 
 -- Tool Versions: 
--- Description: 
+-- Description: Common IP module for edge detection and generating interupts in GDRB in Griffin system
 -- 
 -- Dependencies: 
 -- 
